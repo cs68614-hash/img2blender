@@ -1,13 +1,14 @@
-# Contributing to img2threejs
+# Contributing to img2blender
 
-Thanks for your interest. img2threejs turns a reference image into a code-only, procedural,
-quality-gated Three.js model. Contributions that keep that identity sharp are very welcome.
+Thanks for your interest. img2blender is migrating the quality-gated reference-image
+reconstruction pipeline from a Three.js-only backend to Blender. Contributions should preserve
+the existing evidence and review gates while following `docs/BLENDER_MIGRATION.md` for backend work.
 
 ## Good first areas
 
 - New procedural material or geometry recipes in `grimoire/build/geometry_patterns.md`.
 - Object-domain templates and detail-inventory taxonomy improvements.
-- Generator primitives, bevels, instancing, and surface-band tuning in `forge/stage3_build/generate_threejs_factory.py`.
+- Blender primitives, materials, cameras, rendering, and export work in `forge/stage3_build/generate_blender_scene.py`.
 - More pipeline tests in `forge/tests/test_pipeline.py`.
 - Documentation and worked examples.
 

@@ -1,26 +1,32 @@
 <div align="center">
 
-<img src="assets/logo.svg" width="112" height="104" alt="img2threejs logo" />
+<img src="assets/logo.svg" width="112" height="104" alt="img2blender logo" />
 
-# img2threejs
+# img2blender
 
-**Rebuild the object in a reference image as a code-only, procedural Three.js model.**
+**Rebuild the object in a reference image as a quality-gated Blender asset.**
+
+> [!IMPORTANT]
+> This repository was migrated from **img2threejs**. New specs now target Blender and the primary
+> workflow lets the model operate the user's live local Blender through Blender MCP, save `.blend`
+> files, and capture review evidence. Generated Blender Python remains a headless fallback. See the
+> [migration status](docs/BLENDER_MIGRATION.md) for current fidelity coverage.
 
 Quality-gated, animation-ready, and deliberately token-efficient — reconstruction-by-code, not photogrammetry, mesh extraction, or downloaded art packs.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.4.1-green.svg)](CHANGELOG.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Runtime](https://img.shields.io/badge/runtime-Three.js-000000.svg)](https://threejs.org)
+[![Compatibility backend](https://img.shields.io/badge/compatibility%20backend-Three.js-000000.svg)](https://threejs.org)
 [![Tooling](https://img.shields.io/badge/tooling-Python%203.10%2B%20stdlib-3776ab.svg)](scripts)
 
 <a href="https://trendshift.io/repositories/83608?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-83608" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/83608/daily?language=Python" alt="hoainho%2Fimg2threejs | Trendshift" width="250" height="55"/></a>
 
 </div>
 
-*Reference images reconstructed in code as animation-ready Three.js models, running live in the browser.*
+*Legacy img2threejs examples, preserved while the Blender backend is built.*
 
-### [→ Open the Live Demo Gallery](https://img2threejs.github.io/img2threejs-showcase/)
+### [→ Open the legacy Three.js demo gallery](https://img2threejs.github.io/img2threejs-showcase/)
 
 Every model in the gallery is generated code, running in your browser. No mesh files, no downloads.
 
@@ -113,13 +119,13 @@ After every pass the agent chooses exactly one action: `continue`, `refine-spec`
 1. **Install** — place this folder in your skills directory:
 
    ```bash
-   git clone https://github.com/img2threejs/img2threejs.git ~/.claude/skills/img2threejs
+   git clone <this-repository-url> ~/.claude/skills/img2blender
    ```
 
 2. **Invoke** — in Claude Code, attach or point to an object image and run:
 
    ```
-   /img2threejs Rebuild this object as a Three.js model, keep the proportions, angles, and colours.
+   /img2blender Rebuild this object as a Blender model, keeping the proportions, angles, and colours.
    ```
 
    That is enough: the skill classifies the subject, runs the detail inventory, and gates every pass on its own.
@@ -131,7 +137,7 @@ After every pass the agent chooses exactly one action: `continue`, `refine-spec`
 The one-liner leaves the judgement calls to the skill. When you already know what "correct" means for your subject, say so — each line below maps onto a real gate or artifact in the pipeline, so it changes what gets enforced rather than just adding adjectives:
 
 ```
-/img2threejs Rebuild the subject in this image as a procedural Three.js model.
+/img2blender Rebuild the subject in this image as a Blender model.
 
 Fidelity   Hold proportions and silhouette to the reference. Enumerate the identity-defining
            details first — bevels and rounding, panel seams, fasteners, engraved or painted
@@ -159,21 +165,28 @@ python3 forge/stage1_intake/probe_image.py <image>
 python3 forge/stage2_spec/new_pre_spec_assessment.py "Name" --image <image> --out assessment.json
 python3 forge/stage2_spec/new_sculpt_spec.py "Name" --image <image> --assessment assessment.json --out spec.json
 python3 forge/stage2_spec/validate_sculpt_spec.py spec.json --strict-quality
-python3 forge/stage3_build/generate_threejs_factory.py spec.json --out src/createObjectModel.ts
+python3 forge/stage3_build/prepare_blender_mcp_plan.py spec.json --out build/mcp-plan.json \
+  --blend build/object.blend --render build/review.png
 ```
+
+The model then executes that plan against the configured local Blender MCP server, inspecting the
+viewport after each meaningful pass. Creating the JSON plan does **not** mean Blender was modified.
 
 ---
 
 ## Why it is token-efficient
 
-Most image-to-3D agent loops burn tokens by asking the model to do mechanical work — re-reading the whole model every pass, scoring pixels, validating JSON by hand, re-running steps it already did. img2threejs pushes all of that into deterministic scripts and spends model tokens only where judgment is actually required.
+Most image-to-3D agent loops burn tokens by asking the model to do mechanical work — re-reading the whole model every pass, scoring pixels, validating JSON by hand, re-running steps it already did. img2blender pushes all of that into deterministic scripts and spends model tokens only where judgment is actually required.
 
 - **Scripts enforce, the model judges.** The Python scripts handle validation, gating, spec authoring, PBR extraction, comparison-sheet packaging, and pipeline state. They never score visuals. The model's tokens go to one thing: looking at a single side-by-side sheet and deciding pass or fail.
-- **Zero dependencies, zero install churn.** Every script is pure Python 3.10+ standard library. No pip, no PIL, no numpy, no Playwright. PNG read/write is done with `struct` and `zlib`. Nothing to install means nothing to debug in-context.
+- **No Python package churn.** Pipeline scripts use the Python 3.10+ standard library; producing
+  the final `.blend` additionally requires Blender 4.x.
 - **Pass-gated generation.** The code generator emits only the currently unlocked build pass. The model does not regenerate or re-read the entire model on every iteration — each step is small and scoped.
-- **Fail fast, before codegen.** A strict-quality gate blocks shallow specs before a single line of Three.js is generated, so you never spend tokens rendering a model that was underspecified from the start.
+- **Fail fast, before codegen.** A strict-quality gate blocks shallow specs before a Blender scene
+  script is generated, so you never spend time rendering an underspecified model.
 - **One image per review.** Each pass is judged from exactly one packaged comparison sheet (reference beside render), not a scattering of screenshots.
-- **Text output, not binaries.** The result is diffable TypeScript plus a JSON spec — small, reviewable, and version-controllable, instead of multi-megabyte mesh files.
+- **Reproducible source plus deliverable.** The JSON spec and generated Blender Python remain
+  diffable and reviewable, while the `.blend` is treated as the generated deliverable.
 
 The net effect: you still get a faithful 3D model from an image, but the expensive model context is reserved for visual judgment and code, not bookkeeping. For the full per-stage and per-cycle token breakdown, see [docs/TOKEN_COST.md](docs/TOKEN_COST.md).
 
@@ -189,7 +202,9 @@ The net effect: you still get a faithful 3D model from an image, but the expensi
 | `stage2_spec/validate_sculpt_spec.py` | Validate the spec; `--strict-quality` blocks shallow specs before codegen. |
 | `stage1_intake/extract_pbr_evidence.py` | Reference-derived PBR evidence per crop (inference, not inverse rendering). |
 | `stage3_build/orchestrate_passes.py` | Locked pass state: status, check, sync. |
-| `stage3_build/generate_threejs_factory.py` | Emit the Three.js `Group` factory for the current unlocked pass. |
+| `stage3_build/prepare_blender_mcp_plan.py` | Compile ordered, evidence-bearing operations for the model to execute through local Blender MCP. |
+| `stage3_build/generate_blender_scene.py` | Headless fallback: emit Blender Python and optionally run Blender without MCP. |
+| `stage3_build/generate_threejs_factory.py` | Legacy compatibility: emit a Three.js `Group` for old specs. |
 | `stage4_review/make_comparison_sheet.py` | Package one reference-vs-render sheet for review. |
 | `stage4_review/append_review.py` | Record a per-pass review: scores, decision, evidence. |
 | `stage4_review/cs2_review.py` | Evaluate the blocking CS2 knife review contract and versioned scene thresholds. |
@@ -247,7 +262,7 @@ A single image cannot reveal hidden sides or guarantee exact geometry. The skill
 
 ## Star history
 
-If img2threejs is useful to you, a star helps others find it.
+If img2blender is useful to you, a star helps others find it.
 
 <a href="https://www.star-history.com/#hoainho/img2threejs&Timeline">
   <picture>

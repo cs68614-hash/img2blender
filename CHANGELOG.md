@@ -1,6 +1,21 @@
 # Changelog
 
-All notable changes to **img2threejs** are documented here.
+All notable changes to **img2blender** are documented here. Releases before the rename retain
+their historical img2threejs links and names.
+
+## Unreleased
+
+### Changed
+
+- Renamed the skill and public project identity to `img2blender`.
+- Documented the staged Blender migration and the temporary Three.js compatibility backend.
+- Added the first Blender-native scene generator for primitives, hierarchy, transforms, PBR
+  materials, and deterministic `.blend` output in Blender background mode.
+- Completed the first end-to-end Blender backend pass with all declared primitive families,
+  profile-driven geometry, fixed review camera and lighting, PNG rendering, and optional GLB/FBX
+  delivery exports.
+- Made local Blender MCP the primary execution transport: the model now compiles an ordered MCP
+  operation plan, performs live Blender edits, and must attach save/render/screenshot evidence.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).

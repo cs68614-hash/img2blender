@@ -891,8 +891,16 @@ def make_spec(target_name: str, image: str | None, assessment_payload: dict | No
         "targetName": target_name,
         "targetId": target_id,
         "schemaVersion": "2.1",
+        "backend": {
+            "target": "blender",
+            "executionMode": "blender-mcp",
+            "mcpServer": "blender",
+            "blenderVersion": "4.x",
+            "renderEngine": "BLENDER_EEVEE_NEXT",
+            "unitSystem": "METRIC",
+        },
         "terminologyProfile": {
-            "domain": "real-time procedural Three.js asset",
+            "domain": "procedural Blender asset",
             "geometryTerms": [
                 "silhouette",
                 "topology",

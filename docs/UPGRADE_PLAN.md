@@ -1,4 +1,4 @@
-# img2threejs Upgrade Plan
+# img2blender Upgrade Plan
 
 Status: v1.2.0 SHIPPED. v1.1.0 = Track A detail-first + Track B/likeness scaffolding. v1.2.0 = humanoid character GENERATOR: a flattened, world-space humanoid componentTree template (head/neck/torso/arms + hair, glasses, headphones, face features), per-part character materials, character build passes (proportion-lock, feature-placement) and feature targets, auto-enabled when primaryDomain is character/hybrid (or --character). Verified end-to-end (spec -> generate -> browser render) on a real portrait, producing a recognizable stylized bust. 19/19 tests pass; object pipeline unaffected.
 Target versions: 1.1.0 (Track A), 1.2.0 (Track B + character generator)

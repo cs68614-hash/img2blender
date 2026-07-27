@@ -1,6 +1,10 @@
-# img2threejs Roadmap
+# img2blender Roadmap
 
-Where img2threejs is going: from rebuilding one object at a time to generating whole playable
+## Where img2blender is going
+
+The immediate priority is the staged Blender backend migration described in
+[`docs/BLENDER_MIGRATION.md`](docs/BLENDER_MIGRATION.md). The longer-term direction remains moving
+from rebuilding one object at a time to generating whole playable
 worlds from reference images. For the full technical specification and acceptance criteria of
 in-flight work, see [docs/UPGRADE_PLAN.md](docs/UPGRADE_PLAN.md).
 
@@ -191,7 +195,7 @@ latent bug.
 
 ## Contributing
 
-img2threejs welcomes contributions, and the roadmap is responsive to real usage. If you want to work
+img2blender welcomes contributions, and the roadmap is responsive to real usage. If you want to work
 on something above, see [CONTRIBUTING.md](CONTRIBUTING.md) — say which version's theme your work
 belongs to so it lands in the right tranche. Feature requests and bug reports genuinely move
 priorities: the [showcase gallery](https://img2threejs-showcase.pages.dev/) tracks likes per

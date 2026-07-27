@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate an ObjectSculptSpec JSON file for procedural Three.js generation."""
+"""Validate an ObjectSculptSpec JSON file for img2blender generation."""
 
 from __future__ import annotations
 
@@ -44,6 +44,7 @@ VALID_COMPONENT_LEVELS = {"macro", "meso", "micro"}
 VALID_COMPLEXITY_TIERS = {"unassessed", "simple", "moderate", "complex", "ultra-complex"}
 TERMINOLOGY_LIST_FIELDS = {"geometryTerms", "materialTerms", "lightingTerms"}
 VALID_REVIEW_ACTIONS = {"continue", "refine-spec", "refine-code", "request-input", "stop"}
+VALID_BACKENDS = {"blender", "threejs"}
 VALID_TOPOLOGY_CLASSES = {
     "continuous-sculpt",
     "assembled-solid",
@@ -1894,6 +1895,28 @@ def validate_spec(spec: dict[str, Any]) -> tuple[list[str], list[str]]:
     suitability = spec.get("suitability")
     if suitability not in VALID_SUITABILITY:
         errors.append("suitability must be pass, conditional, or reject")
+    backend = spec.get("backend")
+    if backend is None:
+        warnings.append("missing backend; resolving legacy spec as threejs compatibility mode")
+    elif not isinstance(backend, dict):
+        errors.append("backend must be an object")
+    else:
+        target = backend.get("target")
+        if target not in VALID_BACKENDS:
+            errors.append("backend.target must be blender or threejs")
+        if target == "blender":
+            if backend.get("executionMode", "blender-mcp") not in {"blender-mcp", "generated-python"}:
+                errors.append("backend.executionMode must be blender-mcp or generated-python")
+            if backend.get("executionMode", "blender-mcp") == "blender-mcp" and (
+                not isinstance(backend.get("mcpServer", "blender"), str) or not backend.get("mcpServer", "blender").strip()
+            ):
+                errors.append("backend.mcpServer must be a non-empty string for blender-mcp execution")
+            if not isinstance(backend.get("blenderVersion"), str) or not backend["blenderVersion"].strip():
+                errors.append("backend.blenderVersion must be a non-empty string")
+            if backend.get("renderEngine") not in {"BLENDER_EEVEE_NEXT", "BLENDER_WORKBENCH", "CYCLES"}:
+                errors.append("backend.renderEngine must be BLENDER_EEVEE_NEXT, BLENDER_WORKBENCH, or CYCLES")
+            if backend.get("unitSystem") not in {"METRIC", "IMPERIAL", "NONE"}:
+                errors.append("backend.unitSystem must be METRIC, IMPERIAL, or NONE")
     validate_pre_spec_assessment(spec, errors, warnings)
     validate_terminology_profile(spec, errors, warnings)
     validate_score_block(spec, errors, warnings)
